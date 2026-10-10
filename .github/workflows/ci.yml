@@ -1,4 +1,4 @@
-l# CI/CD: lint -> unit tests -> train -> build & smoke-test the Docker image.
+# CI/CD: lint -> unit tests -> train -> build & smoke-test the Docker image.
 # Any failing step fails the run (and every later job is skipped).
 name: ci-cd
 
