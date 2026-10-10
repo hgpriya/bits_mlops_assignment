@@ -1,0 +1,132 @@
+l# CI/CD: lint -> unit tests -> train -> build & smoke-test the Docker image.
+# Any failing step fails the run (and every later job is skipped).
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  IMAGE: heart-risk-api:${{ github.sha }}
+
+jobs:
+  lint:
+    name: 1. Lint (flake8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install "flake8>=7.0"
+      - name: flake8
+        run: flake8 src scripts tests data --count --statistics --show-source
+
+  test:
+    name: 2. Unit tests (pytest)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: pytest
+        run: |
+          mkdir -p test-results
+          pytest -v --junitxml=test-results/junit.xml \
+                 --cov=heart_mlops --cov-report=term-missing \
+                 --cov-report=xml:test-results/coverage.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+  train:
+    name: 3. Train & track model
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+      - name: Get data (use committed clean CSV, else download + clean)
+        run: |
+          if [ ! -f data/processed/heart_clean.csv ]; then
+            python data/download_data.py
+            python scripts/run_eda.py
+          fi
+          wc -l data/processed/heart_clean.csv
+      - name: Train
+        shell: bash   # -eo pipefail: a training error fails the job despite `tee`
+        run: python scripts/train.py 2>&1 | tee train.log
+      - name: Model summary
+        run: |
+          echo "## Model training" >> "$GITHUB_STEP_SUMMARY"
+          cat reports/model_comparison.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload model
+        uses: actions/upload-artifact@v4
+        with:
+          name: model
+          path: |
+            models/model.joblib
+            models/model_card.json
+      - name: Upload reports & MLflow tracking data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-reports
+          if-no-files-found: ignore
+          path: |
+            train.log
+            reports/
+            mlflow.db
+            mlruns/
+            mlartifacts/
+
+  docker:
+    name: 4. Build & smoke-test container
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: model
+          path: models/
+      - name: Build image
+        run: docker build -t "$IMAGE" .
+      - name: Run container
+        run: docker run -d --name api -p 8000:8000 "$IMAGE"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install requests
+      - name: Smoke test (/health, /predict, 422, /metrics)
+        run: python scripts/smoke_test.py --url http://localhost:8000 --timeout 90
+      - name: Container logs
+        if: always()
+        run: docker logs api > container.log 2>&1; cat container.log
+      - name: Upload container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-logs
+          path: container.log
