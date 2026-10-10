@@ -119,7 +119,8 @@ def _reviewed_skops_types(model) -> list[str]:
 def log_sklearn_model(model, X_example: pd.DataFrame) -> None:
     """Log the pipeline in MLflow format (works across MLflow 2.x and 3.x)."""
     signature = infer_signature(X_example, model.predict_proba(X_example))
-    base = dict(signature=signature, input_example=X_example.head(3))
+    base = dict(signature=signature, input_example=X_example.head(3),
+                registered_model_name=config.REGISTERED_MODEL_NAME)
     trusted = _reviewed_skops_types(model)
     if trusted:
         log.info("Trusting reviewed model types for skops: %s", trusted)

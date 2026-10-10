@@ -1,3 +1,4 @@
+# ---- Runtime + training (clean setup: pip install -r requirements.txt)
 # Data & visualisation
 pandas>=2.1,<3.1
 numpy>=1.26,<2.6
@@ -7,7 +8,11 @@ requests>=2.31
 # Modelling
 scikit-learn>=1.4,<1.9
 joblib>=1.3
-skops>=0.10
-# Experiment tracking
+# Experiment tracking (skops = MLflow's pickle-free sklearn format)
 mlflow>=2.14
-# (API, testing and lint libraries are added in later steps)
+skops>=0.10
+# Serving & monitoring
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+prometheus-client>=0.20

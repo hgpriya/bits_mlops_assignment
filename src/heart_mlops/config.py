@@ -67,5 +67,6 @@ CV_FOLDS = 5
 SELECTION_METRIC = "roc_auc"
 
 MLFLOW_EXPERIMENT = "heart-disease-risk"
+REGISTERED_MODEL_NAME = "heart-disease-classifier"
 # SQLite backend: supports the MLflow UI and model registry without a server.
 MLFLOW_TRACKING_URI = f"sqlite:///{(PROJECT_ROOT / 'mlflow.db').as_posix()}"

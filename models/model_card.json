@@ -1,7 +1,7 @@
 {
   "model_name": "logistic_regression",
-  "trained_at_utc": "2026-10-10T13:23:08+00:00",
-  "mlflow_run_id": "fa3bca8624a647edaf9c5804cf218150",
+  "trained_at_utc": "2026-10-10T15:01:59+00:00",
+  "mlflow_run_id": "1c22c670f48f4303ba99be2d29b92645",
   "selection_metric": "cv_roc_auc_mean",
   "best_params": {
     "C": 0.3,

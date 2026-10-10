@@ -45,6 +45,7 @@ def flag_out_of_range(df: pd.DataFrame) -> pd.DataFrame:
         bad = ~out[col].between(low, high) & out[col].notna()
         if bad.any():
             logger.warning("%s: %d out-of-range value(s) set to NaN", col, int(bad.sum()))
+            out[col] = out[col].astype(float)  # int columns cannot hold NaN
             out.loc[bad, col] = np.nan
     return out
 

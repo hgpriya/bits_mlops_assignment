@@ -11,3 +11,9 @@ data/raw/*
 !data/raw/.gitkeep
 *.log
 mlflow.db
+models/*.tmp
+container.log
+train.log
+test-results/
+coverage.xml
+.coverage

@@ -1,0 +1,11 @@
+[project]
+name = "heart-mlops"
+version = "0.1.0"
+description = "Heart disease risk prediction - end-to-end MLOps assignment"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
