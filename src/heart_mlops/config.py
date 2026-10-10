@@ -55,3 +55,17 @@ VALID_RANGES = {
     "oldpeak": (0, 7),
     "ca": (0, 3),
 }
+
+# ---------------------------------------------------------------- modelling
+MODELS_DIR = PROJECT_ROOT / "models"
+MODEL_PATH = MODELS_DIR / "model.joblib"
+MODEL_CARD_PATH = MODELS_DIR / "model_card.json"
+
+SEED = 42
+TEST_SIZE = 0.2
+CV_FOLDS = 5
+SELECTION_METRIC = "roc_auc"
+
+MLFLOW_EXPERIMENT = "heart-disease-risk"
+# SQLite backend: supports the MLflow UI and model registry without a server.
+MLFLOW_TRACKING_URI = f"sqlite:///{(PROJECT_ROOT / 'mlflow.db').as_posix()}"
