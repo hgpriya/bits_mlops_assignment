@@ -3,7 +3,7 @@
 Predicts the presence of heart disease from patient health data (UCI Heart Disease,
 Cleveland subset) and serves the model as a monitored, containerised API on Kubernetes.
 
-**Repository:** `<add your GitHub URL>`  **Demo video:** `<add link>`
+**Repository:** `https://github.com/hgpriya/bits_mlops_assignment.git`  **Demo video:** `https://1drv.ms/v/c/ced26d558690d890/IQBABk8odpJ0QrFmHeF-kMvzAbebkt6C1mT_eBJIFw042vo?e=9ONO25`
 
 ## Architecture
 ```mermaid
